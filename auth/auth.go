@@ -66,3 +66,17 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		users[creds.Username] = creds.Password
 	}
 }
+
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := r.Cookie("session")
+
+	sessionToken := cookie.Value
+
+	delete(sessions, sessionToken)
+
+	http.SetCookie(w, &http.Cookie{
+		Name: "session",
+		Value: "",
+		Expires: time.Now(),
+	})
+}

@@ -41,3 +41,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("templates/base.html", "templates/register.html")
 	tmpl.Execute(w, nil)
 }
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	auth.LogoutUser(w, r)
+	http.Redirect(w, r, "/login", 303)
+}
