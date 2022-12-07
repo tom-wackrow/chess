@@ -80,3 +80,26 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now(),
 	})
 }
+
+func RequireAuthenticatedUser(f http.HandlerFunc) http.HandlerFunc {
+	return func (w http.ResponseWriter, r *http.Request) {
+		cookie, _ := r.Cookie("session")
+
+		sessionToken := cookie.Value
+
+		userSession, exists := sessions[sessionToken]
+
+		if !exists {
+			http.Redirect(w, r, "/login", 303)
+			return
+		}
+
+		if userSession.isExpired() {
+			delete(sessions, sessionToken)
+			http.Redirect(w, r, "/login", 303)
+			return
+		}
+
+		f(w, r)
+	}
+}
