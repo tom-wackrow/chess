@@ -24,3 +24,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	tmpl, _ := template.ParseFiles("templates/base.html", "templates/login.html")
 	tmpl.Execute(w, nil)
 }
+
+func Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method =="POST" {
+		creds := auth.GetCredentials(w, r)
+		pwd2 := r.FormValue("password2")
+		if pwd2 == creds.Password {
+			auth.RegisterUser(w, r)
+			if auth.AuthUser(w, r) {
+				http.Redirect(w, r, "/dashboard", 303)
+				return
+			}
+		}
+	}
+
+	tmpl, _ := template.ParseFiles("templates/base.html", "templates/register.html")
+	tmpl.Execute(w, nil)
+}

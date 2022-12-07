@@ -59,3 +59,10 @@ func AuthUser(w http.ResponseWriter, r *http.Request) bool {
 	})
 	return true
 }
+
+func RegisterUser(w http.ResponseWriter, r *http.Request) {
+	creds := GetCredentials(w, r)
+	if _, ok := users[creds.Username]; !ok {
+		users[creds.Username] = creds.Password
+	}
+}
