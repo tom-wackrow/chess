@@ -68,8 +68,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
-	cookie, _ := r.Cookie("session")
+	cookie, err := r.Cookie("session")
 
+	if err != nil {
+		http.Redirect(w, r, "/login", 303)
+		return
+	}
 	sessionToken := cookie.Value
 
 	delete(sessions, sessionToken)
@@ -100,9 +104,57 @@ func RequireAuthenticatedUser(f http.HandlerFunc) http.HandlerFunc {
 
 		if userSession.isExpired() {
 			delete(sessions, sessionToken)
+			http.SetCookie(w, &http.Cookie{
+				Name: "session",
+				Value: "",
+				Expires: time.Now(),
+			})
 			http.Redirect(w, r, "/login", 303)
 			return
 		}
+		newSessionToken := uuid.NewString()
+		ExpiresAt := time.Now().Add(120 * time.Second)
+
+		sessions[newSessionToken] = session{
+			username: sessions[sessionToken].username,
+			expiry: ExpiresAt,
+		}
+		delete(sessions, sessionToken)
+
+		http.SetCookie(w, &http.Cookie{
+			Name: "session",
+			Value: newSessionToken,
+			Expires: ExpiresAt,
+		})
+
+		f(w, r)
+	}
+}
+
+func RefreshSession(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("session")
+
+		if err != nil {
+			http.Redirect(w, r, "/login", 303)
+			return
+		}
+
+		oldSessionToken := cookie.Value
+		newSessionToken := uuid.NewString()
+		ExpiresAt := time.Now().Add(120 * time.Second)
+
+		sessions[newSessionToken] = session{
+			username: sessions[oldSessionToken].username,
+			expiry: ExpiresAt,
+		}
+		delete(sessions, oldSessionToken)
+
+		http.SetCookie(w, &http.Cookie{
+			Name: "session",
+			Value: newSessionToken,
+			Expires: ExpiresAt,
+		})
 
 		f(w, r)
 	}
