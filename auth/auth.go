@@ -83,8 +83,12 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 
 func RequireAuthenticatedUser(f http.HandlerFunc) http.HandlerFunc {
 	return func (w http.ResponseWriter, r *http.Request) {
-		cookie, _ := r.Cookie("session")
+		cookie, err := r.Cookie("session")
 
+		if err != nil {
+			http.Redirect(w, r, "/login", 303)
+			return
+		}
 		sessionToken := cookie.Value
 
 		userSession, exists := sessions[sessionToken]
