@@ -12,6 +12,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.HandleFunc("/dashboard", auth.RequireAuthenticatedUser(routes.Dashboard))
+	http.HandleFunc("/chess", auth.RequireAuthenticatedUser(routes.Chess))
 	http.HandleFunc("/login", routes.Login)
 	http.HandleFunc("/register", routes.Register)
 	http.HandleFunc("/logout", routes.Logout)
