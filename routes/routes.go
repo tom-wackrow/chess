@@ -47,7 +47,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", 303)
 }
 
-func Chess(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("templates/base.html", "templates/chess.html")
+func LocalChess(w http.ResponseWriter, r *http.Request) {
+	tmpl, _ := template.ParseFiles("templates/base.html", "templates/chess/localchess.html")
+	tmpl.Execute(w, nil)
+}
+
+func ChessVSBot(w http.ResponseWriter, r *http.Request) {
+	tmpl, _ := template.ParseFiles("templates/base.html", "templates/chess/VSBot.html")
 	tmpl.Execute(w, nil)
 }
