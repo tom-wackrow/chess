@@ -2,8 +2,11 @@ package routes
 
 import (
 	"chess-website/auth"
+	"fmt"
 	"html/template"
 	"net/http"
+
+	"github.com/freeeve/uci"
 )
 
 
@@ -47,7 +50,42 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", 303)
 }
 
-func Chess(w http.ResponseWriter, r *http.Request) {
-	tmpl, _ := template.ParseFiles("templates/base.html", "templates/chess.html")
+func LocalChess(w http.ResponseWriter, r *http.Request) {
+	tmpl, _ := template.ParseFiles("templates/base.html", "templates/chess/localChess.html")
 	tmpl.Execute(w, nil)
+}
+
+func VSBot(w http.ResponseWriter, r *http.Request) {
+	tmpl, _ := template.ParseFiles("templates/base.html", "templates/chess/VSBot.html")
+	tmpl.Execute(w, nil)
+}
+
+func Stockfish(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		return
+	}
+
+
+	fen := r.FormValue("fen")
+
+	eng, err := uci.NewEngine("stockfish.exe")
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	eng.SetOptions(uci.Options{
+		Hash: 128,
+		Ponder: false,
+		OwnBook: true,
+		MultiPV: 4,
+	})
+
+	eng.SetFEN(fen)
+
+	resultOptions := uci.HighestDepthOnly | uci.IncludeUpperbounds | uci.IncludeLowerbounds
+	result, _ := eng.GoDepth(10, resultOptions)
+
+	w.Write([]byte(result.BestMove))
+	
 }
