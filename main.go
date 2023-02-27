@@ -20,8 +20,8 @@ func main() {
 	http.HandleFunc("/logout", routes.Logout)
 	http.HandleFunc("/stockfish", routes.Stockfish)
 	// http.HandleFunc("/socket", chess.SocketHandler)
-	http.HandleFunc("/multiplayer/create", multiplayer.MultiplayerCreate)
-	http.HandleFunc("/multiplayer/play/", multiplayer.MultiplayerPlay)
+	http.HandleFunc("/multiplayer/create", auth.RequireAuthenticatedUser(multiplayer.MultiplayerCreate))
+	http.HandleFunc("/multiplayer/play/", auth.RequireAuthenticatedUser(multiplayer.MultiplayerPlay))
 
 	http.ListenAndServe(":80", nil)
 }

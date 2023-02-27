@@ -576,7 +576,7 @@
     // default piece theme is wikipedia
     if (!config.hasOwnProperty('pieceTheme') ||
         (!isString(config.pieceTheme) && !isFunction(config.pieceTheme))) {
-      config.pieceTheme = 'static/img/chesspieces/{piece}.png'
+      config.pieceTheme = '/static/img/chesspieces/{piece}.png'
     }
 
     // animation speeds

@@ -32,13 +32,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method =="POST" {
 		creds := auth.GetCredentials(w, r)
 		pwd2 := r.FormValue("password2")
-		if pwd2 == creds.Password {
-			auth.RegisterUser(w, r)
-			if auth.AuthUser(w, r) {
+
+		if _, err := auth.DB.GetEntryByUsername(creds.Username); err != nil {
+			if pwd2 == creds.Password {
+				auth.RegisterUser(w, r)
+				auth.AuthUser(w, r)
 				http.Redirect(w, r, "/dashboard", 303)
 				return
 			}
 		}
+		return
 	}
 
 	tmpl, _ := template.ParseFiles("templates/base.html", "templates/register.html")
@@ -84,8 +87,7 @@ func Stockfish(w http.ResponseWriter, r *http.Request) {
 	eng.SetFEN(fen)
 
 	resultOptions := uci.HighestDepthOnly | uci.IncludeUpperbounds | uci.IncludeLowerbounds
-	result, _ := eng.GoDepth(10, resultOptions)
+	result, _ := eng.GoDepth(1, resultOptions)
 
 	w.Write([]byte(result.BestMove))
-	
 }

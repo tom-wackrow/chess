@@ -1,18 +1,23 @@
 package auth
 
 import (
+	"chess-website/database"
 	"net/http"
 	"time"
+
+	"crypto/sha256"
 
 	"github.com/google/uuid"
 )
 
-var users = map[string]string{
-	"admin": "admin",
-	"test":  "test",
-}
+var DB *database.Database
+var	EMPTY_ENTRY database.UserInfoEntry = database.UserInfoEntry{}
 
 var sessions = map[string]session{}
+
+func init() {
+	DB, _ = database.InitDB()
+}
 
 type session struct {
 	username string
@@ -38,12 +43,18 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) credentials{
 func AuthUser(w http.ResponseWriter, r *http.Request) bool {
 	creds := GetCredentials(w, r)
 
-	expectedPassword, ok := users[creds.Username]
+	expectedEntry, err := DB.GetEntryByUsername(creds.Username)
 
-	if !ok || expectedPassword != creds.Username {
+	if err != nil {
 		return false
 	}
 
+	actualPasswordHash := sha256.Sum256([]byte(creds.Password))
+	if string(actualPasswordHash[:]) != expectedEntry.PasswordHash {
+		return false
+	}
+
+	
 	newSession := uuid.NewString()
 	expiresAt := time.Now().Add(120 * time.Second)
 
@@ -62,8 +73,11 @@ func AuthUser(w http.ResponseWriter, r *http.Request) bool {
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	creds := GetCredentials(w, r)
-	if _, ok := users[creds.Username]; !ok {
-		users[creds.Username] = creds.Password
+	if _, err := DB.GetEntryByUsername(creds.Username); err != nil {
+		DB.Insert(database.UserInfoEntry{
+			Username: creds.Username, 
+			PasswordHash: creds.Password,
+		})
 	}
 }
 
