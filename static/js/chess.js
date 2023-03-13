@@ -29,4 +29,6 @@ function onDrop(source, target) {
     })
     
     if (move === null) return "snapback" // if move is not legal, snap back to previous board state
+
+    board.position(game.fen())
 }

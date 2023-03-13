@@ -29,4 +29,22 @@ function onDrop(source, target) {
     })
     
     if (move === null) return "snapback" // if move is not legal, snap back to previous board state
+
+    var body = new FormData();
+    body.append("fen", game.fen());
+    let response = fetch("/stockfish", {
+        method: "POST",
+        body: body,
+    }).then(async (response) => {
+        const data = await response.text();
+        game.move({
+        from: data.substring(0, 2),
+        to: data.substring(2,),
+        promotion: "q",
+    });
+
+    board.position(game.fen())
+    });
+
+    
 }

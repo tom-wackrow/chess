@@ -7,9 +7,11 @@ import (
 	"strconv"
 
 	chess "chess-website/chess"
+
+	"github.com/gorilla/websocket"
 )
 
-
+var upgrader = websocket.Upgrader{}
 
 func MultiplayerCreate(w http.ResponseWriter, r *http.Request) { // /multiplayer/create
 	game := chess.CreateGame()
@@ -30,11 +32,4 @@ func MultiplayerPlay(w http.ResponseWriter, r *http.Request) { // /multiplayer/p
 	} else {
 		http.Redirect(w, r, "/multiplayer/create", 303)
 	}
-}
-
-func MultiplayerSocketHandler(game chess.ChessGame) {
-	for game.WhitePlayer.Conn == nil {} // when game is created, user that created the game is set as black
-	// when white websocket connection is no longer empty, the function will continue
-
-	
 }

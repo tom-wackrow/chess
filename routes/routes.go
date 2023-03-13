@@ -71,7 +71,7 @@ func Stockfish(w http.ResponseWriter, r *http.Request) {
 
 	fen := r.FormValue("fen")
 
-	eng, err := uci.NewEngine("stockfish.exe")
+	eng, err := uci.NewEngine("/stockfish.exe")
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -87,7 +87,7 @@ func Stockfish(w http.ResponseWriter, r *http.Request) {
 	eng.SetFEN(fen)
 
 	resultOptions := uci.HighestDepthOnly | uci.IncludeUpperbounds | uci.IncludeLowerbounds
-	result, _ := eng.GoDepth(1, resultOptions)
+	result, _ := eng.GoDepth(10, resultOptions)
 
 	w.Write([]byte(result.BestMove))
 }
