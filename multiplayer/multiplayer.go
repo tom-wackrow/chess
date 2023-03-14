@@ -11,8 +11,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{} // for converting connections from http to websocket
 
+// route for users to connect and create a game
 func MultiplayerCreate(w http.ResponseWriter, r *http.Request) { // /multiplayer/create
 	game := chess.CreateGame()
 	chess.GameList = append(chess.GameList, game)
@@ -20,6 +21,7 @@ func MultiplayerCreate(w http.ResponseWriter, r *http.Request) { // /multiplayer
 	http.Redirect(w, r, fmt.Sprintf("/multiplayer/play/%v", game.ID), 303) // redirect to page for game' that was created
 }
 
+// route for users to join and play a game that already exists
 func MultiplayerPlay(w http.ResponseWriter, r *http.Request) { // /multiplayer/play/:id
 	id, _ := strconv.Atoi(r.URL.Path[len("/multiplayer/play/"):])
 	if chess.GameExists(id) {

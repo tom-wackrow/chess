@@ -2,6 +2,7 @@ package chess
 
 import "github.com/gorilla/websocket"
 
+// for storing currently ongoing games
 type ChessGame struct {
 	ID            int    `json:"id"`
 	FEN           string `json:"fen"`
@@ -15,8 +16,10 @@ type Player struct {
 	Conn *websocket.Conn
 }
 
+// list of all occuring games
 var GameList = []ChessGame{}
 
+// initialise a new chess game
 func CreateGame() ChessGame {
 	game := ChessGame{
 		ID:            len(GameList),
@@ -35,6 +38,7 @@ func CreateGame() ChessGame {
 	return game
 }
 
+// return a game from GameList using its id
 func GetGameByID(id int) (ChessGame) {
 	for _, game := range GameList {
 		if game.ID == id {

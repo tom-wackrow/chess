@@ -9,6 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// reference to database
 type Database struct {
 	mu sync.Mutex
 	db *sql.DB
@@ -20,6 +21,7 @@ type UserInfoEntry struct {
 	PasswordHash string
 }
 
+// add row to database
 func (db *Database) Insert(entry UserInfoEntry) (error) {
 	passwordHash := sha256.Sum256([]byte(entry.PasswordHash))
 	_, err := db.db.Exec("INSERT INTO userinfo VALUES(NULL, ?, ?);", entry.Username, string(passwordHash[:]))
@@ -30,18 +32,21 @@ func (db *Database) Insert(entry UserInfoEntry) (error) {
 	return nil
 }
 
+// get row from database
 func (db *Database) GetEntryByUsername(username string) (UserInfoEntry, error) {
 	row := db.db.QueryRow("SELECT * FROM userinfo WHERE username=?", username)
 
 	entry := UserInfoEntry{}
 
 	if err := row.Scan(&entry.ID, &entry.Username, &entry.PasswordHash); err != nil {
-		return UserInfoEntry{}, errors.New("No Entry Found")
+		return UserInfoEntry{}, errors.New("No Entry Found") // if no entry is found return an error
 	}
 
 	return entry, nil
 }
 
+// string for creating table
+// in database if it does not exist
 const createString = `
 	CREATE TABLE IF NOT EXISTS userinfo (
 		id INTEGER NOT NULL PRIMARY KEY,
@@ -49,6 +54,7 @@ const createString = `
 		passwordHash varchar(64)
 	);`
 
+// initialise database instance
 func InitDB() (*Database, error){
 	db, err := sql.Open("sqlite3", "database.db")
 	if err != nil {

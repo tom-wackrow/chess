@@ -10,8 +10,11 @@ import (
 
 
 func main() {
+	// serve static files such as javascript files
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
+
+	// add routes that users can access
 	http.HandleFunc("/", auth.RequireAuthenticatedUser(routes.Dashboard))
 	http.HandleFunc("/chess", auth.RequireAuthenticatedUser(routes.LocalChess))
 	http.HandleFunc("/vsbot", auth.RequireAuthenticatedUser(routes.VSBot))
